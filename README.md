@@ -87,7 +87,7 @@ The Kibana instance is configured to present the entirety of the SOC's intellige
 *(Screenshots of current dashboard progress)*
 ![Dashboard View 1](Img_documentation/Screenshot%202026-03-14%20201642.png)
 ![Dashboard View 2](Img_documentation/Screenshot%202026-03-14%20202743.png)
-![Adding Rule](Img_documentation/to_add_rule.png)
+![Adding Rule](Img_documentation/Screenshot%2026-03-14%025256.png)
 
 ---
 
