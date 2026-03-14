@@ -1,0 +1,17 @@
+update_time: 2026-03-14T17:09:54.2092515Z
+event_logs:
+- name: E:\soc-big-project\pcap_to_process\bruteforce_4625_sample.evtx
+  record_number: 289156
+  timestamp: 2016-10-07T09:38:24.7494104Z
+  bookmark: "<BookmarkList>\r\n  <Bookmark Channel='E:\\soc-big-project\\pcap_to_process\\bruteforce_4625_sample.evtx'
+    RecordId='289156' IsCurrent='true'/>\r\n</BookmarkList>"
+- name: E:\soc-big-project\pcap_to_process\sysmon_1_11_rundll32_cpl_ostap.evtx
+  record_number: 4865
+  timestamp: 2019-07-29T21:11:19.0981057Z
+  bookmark: "<BookmarkList>\r\n  <Bookmark Channel='E:\\soc-big-project\\pcap_to_process\\sysmon_1_11_rundll32_cpl_ostap.evtx'
+    RecordId='5' IsCurrent='true'/>\r\n</BookmarkList>"
+- name: E:\soc-big-project\pcap_to_process\temp_scheduled_task_4698_4699.evtx
+  record_number: 566840
+  timestamp: 2019-03-19T00:02:04.3512527Z
+  bookmark: "<BookmarkList>\r\n  <Bookmark Channel='E:\\soc-big-project\\pcap_to_process\\temp_scheduled_task_4698_4699.evtx'
+    RecordId='2' IsCurrent='true'/>\r\n</BookmarkList>"

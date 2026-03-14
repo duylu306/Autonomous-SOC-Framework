@@ -1,0 +1,70 @@
+title: Suspicious Parent Child Process
+logsource:
+  product: windows
+  category: process_creation
+
+detection:
+  parent:
+    ParentImage|endswith:
+      - winword.exe
+      - excel.exe
+      - powerpnt.exe
+      - outlook.exe
+
+  child:
+    Image|endswith:
+      - powershell.exe
+      - cmd.exe
+      - mshta.exe
+      - rundll32.exe
+      - regsvr32.exe
+      - certutil.exe
+
+  condition: parent and child
+
+level: high
+tags:
+  - attack.t1059
+  - attack.t1204
+
+#   process.parent.name: (
+# "winword.exe" or
+# "excel.exe" or
+# "powerpnt.exe" or
+# "outlook.exe" or
+# "explorer.exe" or
+# "wmiprvse.exe" or
+# "wscript.exe" or
+# "cscript.exe" or
+# "mshta.exe" or
+# "rundll32.exe" or
+# "regsvr32.exe" or
+# "cmd.exe" or
+# "powershell.exe" or
+# "schtasks.exe" or
+# "taskeng.exe" or
+# "services.exe" or
+# "svchost.exe" or
+# "lsass.exe"
+# )
+# and
+# process.name: (
+# "powershell.exe" or
+# "cmd.exe" or
+# "mshta.exe" or
+# "rundll32.exe" or
+# "regsvr32.exe" or
+# "certutil.exe" or
+# "bitsadmin.exe" or
+# "wmic.exe" or
+# "wscript.exe" or
+# "cscript.exe" or
+# "msbuild.exe" or
+# "installutil.exe" or
+# "cmstp.exe" or
+# "hh.exe" or
+# "odbcconf.exe" or
+# "presentationhost.exe" or
+# "diskshadow.exe" or
+# "forfiles.exe"
+# )

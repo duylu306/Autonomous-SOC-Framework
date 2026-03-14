@@ -1,0 +1,123 @@
+
+volumes:
+  certs:
+  esdata:
+
+networks:
+  soc_network:
+    driver: bridge
+
+services:
+  setup:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    volumes:
+      - certs:/usr/share/elasticsearch/config/certs
+    user: "0"
+    command: >
+      bash -c '
+        if [ ! -f config/certs/ca.zip ]; then
+          echo "Creating CA and generating SSL/TLS certificates...";
+          bin/elasticsearch-certutil ca --silent --pem -out config/certs/ca.zip;
+          unzip config/certs/ca.zip -d config/certs;
+          echo -ne "instances:\n  - name: elasticsearch\n    dns:\n      - elasticsearch\n      - localhost\n    ip:\n      - 127.0.0.1\n" > config/certs/instances.yml;
+          bin/elasticsearch-certutil cert --silent --pem -out config/certs/certs.zip --in config/certs/instances.yml --ca-cert config/certs/ca/ca.crt --ca-key config/certs/ca/ca.key;
+          unzip config/certs/certs.zip -d config/certs;
+          chown -R root:root config/certs;
+          find . -type d -exec chmod 750 {} \; ;
+          find . -type f -exec chmod 640 {} \; ;
+        fi;
+        echo "SSL/TLS setup completed!";
+      '
+    networks:
+      - soc_network
+
+  elasticsearch:
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    environment:
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+      - "ELASTIC_PASSWORD=SoC_Admin_Password_123!"
+      - "xpack.security.enabled=true"
+      - "xpack.security.http.ssl.enabled=true"
+      - "xpack.security.http.ssl.key=certs/elasticsearch/elasticsearch.key"
+      - "xpack.security.http.ssl.certificate=certs/elasticsearch/elasticsearch.crt"
+      - "xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt"
+    volumes:
+      - certs:/usr/share/elasticsearch/config/certs
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+    networks:
+      - soc_network
+
+  kibana:
+    depends_on:
+      - elasticsearch
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    environment:
+      - "ELASTICSEARCH_HOSTS=https://elasticsearch:9200"
+      - "ELASTICSEARCH_USERNAME=kibana_system"
+      - "ELASTICSEARCH_PASSWORD=SoC_Admin_Password_123!"
+      - "XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=SoC_Lab_Encrypted_Saved_Objects_Key_12345!"
+      - "XPACK_REPORTING_ENCRYPTIONKEY=SoC_Lab_Reporting_Encryption_Key_12345678!"
+      - "XPACK_SECURITY_ENCRYPTIONKEY=SoC_Lab_Security_Encryption_Key_1234567890!"
+      - "ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt"
+    ports:
+      - "5601:5601"
+  
+    volumes:
+      - certs:/usr/share/kibana/config/certs
+    networks:
+      - soc_network
+
+  zeek:
+    image: blacktop/zeek:latest
+    volumes:
+      - ../pcap_to_process:/pcap_to_process
+      - ../zeek_logs:/zeek_logs
+    entrypoint: tail -f /dev/null
+    networks:
+      - soc_network
+
+  logstash:
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    image: docker.elastic.co/logstash/logstash:8.11.0
+    user: "0"
+    volumes:
+      - ./pipeline:/usr/share/logstash/pipeline
+      - ../zeek_logs:/zeek_logs
+      - ../suricata_logs:/suricata_logs  
+      - ../windows_logs:/windows_logs
+      - ./ti_feed.yml:/usr/share/logstash/ti_feed.yml
+      - certs:/usr/share/logstash/config/certs
+    environment:
+      - xpack.monitoring.enabled=false
+    networks:
+      - soc_network
+    
+
+  suricata:
+    image: jasonish/suricata:latest
+    volumes:
+      - ../pcap_to_process:/pcap_to_process
+      - ../suricata_logs:/var/log/suricata
+    command: >
+      suricata -c /etc/suricata/suricata.yaml
+              -l /var/log/suricata
+              -i eth0
+    networks:
+      - soc_network

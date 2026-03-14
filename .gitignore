@@ -1,0 +1,16 @@
+# Logs
+suricata_logs/*
+zeek_logs/*
+windows_logs/*
+*.log
+*.pcap
+*.pcapng
+
+# Infrastructure & Secrets
+infra/certs/
+infra/esdata/
+.env
+
+# OS specific
+.DS_Store
+Thumbs.db

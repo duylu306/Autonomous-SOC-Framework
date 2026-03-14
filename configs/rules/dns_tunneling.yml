@@ -1,0 +1,20 @@
+title: Data Exfiltration via DNS Tunneling (High Entropy)
+id: 8a3f8b8c-1234-5678-90ab-cdef12345678
+status: experimental
+description: Phát hiện truy vấn DNS có độ dài bất thường và Shannon entropy cao, dấu hiệu của việc tuồn dữ liệu (Data Exfiltration) qua DNS.
+logsource:
+    category: dns
+    product: zeek
+detection:
+    selection:
+        type: 'zeek'
+    condition_entropy:
+        dns.question.entropy|gte: 3.5
+    condition_length:
+        dns.question.label_length|gte: 50
+    condition: selection and condition_entropy and condition_length
+timeframe: 15m
+tags:
+    - attack.exfiltration
+    - attack.t1071.004
+level: high

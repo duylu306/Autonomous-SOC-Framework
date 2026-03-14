@@ -1,0 +1,8 @@
+winlogbeat.event_logs:
+  - name: ${EVTX_FILE}     # Sẽ truyền đường dẫn file vào qua command
+
+output.elasticsearch:
+  hosts: ["https://localhost:9200"]
+  username: "elastic"
+  password: "SoC_Admin_Password_123!"
+  ssl.verification_mode: none  # Bỏ qua check chứng chỉ SSL localhost
